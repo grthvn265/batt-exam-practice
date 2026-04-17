@@ -34,7 +34,8 @@ if (isset($_POST['compute_tax'])) {
             $age = $birth_date->diff($pay_date)->y;
             $years_in_barangay = $residency_date->diff($pay_date)->y;
 
-            $first_part_tax = ($age >= 60) ? 0 : ($first_area * 25);
+            $first_rate = ($age >= 60) ? 15 : 25;
+            $first_part_tax = $first_area * $first_rate;
             $next_rate = ($years_in_barangay >= 10) ? 50 : 75;
             $next_part_tax = $next_area * $next_rate;
 

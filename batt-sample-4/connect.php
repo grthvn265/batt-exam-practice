@@ -1,5 +1,5 @@
 <?php
-$conn = new mysqli('localhost', 'root', '', 'batt_sample4_db');
+$conn = new mysqli('localhost', 'root', '', 'pse_batt');
 
 if ($conn->connect_error) {
     die('Connection failed: ' . $conn->connect_error);
