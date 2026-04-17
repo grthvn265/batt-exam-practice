@@ -82,6 +82,3 @@ if(isset($_POST['submit'])) {
         echo "Resident added successfully.";
     <?php endif; ?>
 </form>
-
-
-
