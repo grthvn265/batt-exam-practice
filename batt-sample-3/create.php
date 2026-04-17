@@ -20,7 +20,7 @@ if(isset($_POST['submit'])) {
     $part1 = strtoupper(substr($last_name, 0, 3));
     $part2 = strtoupper(date('mdY', strtotime($date_of_birth)));
     $part3 = strtoupper(substr($civil_status, 0, 1));
-    $part4 = rand(10000, 99999);
+    $part4 = str_pad(rand(0, 9999), 5, '0', STR_PAD_LEFT);
     $res_code = $part1 . "-" . $part2 . "-" . $part3 . "-" . $part4;
 
     $query = "INSERT INTO residents (resident_code, last_name, given_name, middle_name, date_of_birth, date_of_stay, civil_status)
