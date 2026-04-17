@@ -7,6 +7,14 @@ if (!isset($_POST['edit']) || !isset($_POST['id'])) {
 }
 
 $id = $_POST['id'];
+$id = trim($id);
+
+if (!ctype_digit($id)) {
+    header("Location: index.php");
+    exit;
+}
+
+$id = mysqli_real_escape_string($conn, $id);
 $query = "SELECT * FROM residents WHERE id = '$id'";
 $result = mysqli_query($conn, $query);
 

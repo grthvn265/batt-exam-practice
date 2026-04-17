@@ -6,6 +6,7 @@ $selected_documents = [];
 $resident = null;
 $amount_due = 0;
 $error = "";
+$allowed_documents = ['Barangay Clearance', 'Business Permit', 'Certificate of Residency'];
 
 if (isset($_POST['apply_documents'])) {
 	$resident_code = trim($_POST['resident_code'] ?? "");
@@ -27,6 +28,19 @@ if (isset($_POST['apply_documents'])) {
 
 	if ($error === "" && empty($selected_documents)) {
 		$error = "Please select at least one document.";
+	}
+
+	if ($error === "" && !preg_match('/^[A-Z]{3}-\d{8}-[A-Z]-\d{5}$/', strtoupper($resident_code))) {
+		$error = "Invalid resident code format.";
+	}
+
+	if ($error === "") {
+		foreach ($selected_documents as $document) {
+			if (!in_array($document, $allowed_documents, true)) {
+				$error = "Invalid document selected.";
+				break;
+			}
+		}
 	}
 
 	if ($error === "" && $resident) {

@@ -8,27 +8,49 @@ $date_of_birth = "";
 $date_of_stay = "";
 $civil_status = "";
 $res_code = "";
+$error = "";
 
 if(isset($_POST['submit'])) {
-    $last_name = $_POST['last_name'];
-    $first_name = $_POST['first_name'];
-    $middle_name = $_POST['middle_name'];
-    $date_of_birth = $_POST['date_of_birth'];
-    $date_of_stay = $_POST['date_of_stay'];
-    $civil_status = $_POST['civil_status'];
+    $last_name = htmlspecialchars(trim($_POST['last_name'] ?? ""));
+    $first_name = htmlspecialchars(trim($_POST['first_name'] ?? ""));
+    $middle_name = htmlspecialchars(trim($_POST['middle_name'] ?? ""));
+    $date_of_birth = htmlspecialchars(trim($_POST['date_of_birth'] ?? ""));
+    $date_of_stay = htmlspecialchars(trim($_POST['date_of_stay'] ?? ""));
+    $civil_status = htmlspecialchars(trim($_POST['civil_status'] ?? ""));
 
-    $part1 = strtoupper(substr($last_name, 0, 3));
-    $part2 = strtoupper(date('mdY', strtotime($date_of_birth)));
-    $part3 = strtoupper(substr($civil_status, 0, 1));
-    $part4 = str_pad(rand(0, 9999), 5, '0', STR_PAD_LEFT);
-    $res_code = $part1 . "-" . $part2 . "-" . $part3 . "-" . $part4;
+    $allowed_status = ["Single", "Married", "Seperated", "Separated", "Widowed", "Divorced"];
 
-    $query = "INSERT INTO residents (resident_code, last_name, given_name, middle_name, date_of_birth, date_of_stay, civil_status)
-     VALUES ('$res_code', '$last_name', '$first_name', '$middle_name', '$date_of_birth', '$date_of_stay', '$civil_status')";
+    if ($last_name === "" || $first_name === "" || $date_of_birth === "" || $date_of_stay === "" || $civil_status === "") {
+        $error = "Please fill in all required fields.";
+    } elseif (!in_array($civil_status, $allowed_status, true)) {
+        $error = "Invalid civil status.";
+    } elseif (!strtotime($date_of_birth) || !strtotime($date_of_stay)) {
+        $error = "Invalid date value.";
+    } elseif (strtotime($date_of_stay) < strtotime($date_of_birth)) {
+        $error = "Date of stay cannot be earlier than date of birth.";
+    } else {
+        $safe_last_name = mysqli_real_escape_string($conn, $last_name);
+        $safe_first_name = mysqli_real_escape_string($conn, $first_name);
+        $safe_middle_name = mysqli_real_escape_string($conn, $middle_name);
+        $safe_date_of_birth = mysqli_real_escape_string($conn, $date_of_birth);
+        $safe_date_of_stay = mysqli_real_escape_string($conn, $date_of_stay);
+        $safe_civil_status = mysqli_real_escape_string($conn, $civil_status);
 
-    if ($conn->query($query)) {
-        header("Location: index.php");
-        exit;
+        $part1 = strtoupper(substr($last_name, 0, 3));
+        $part2 = strtoupper(date('mdY', strtotime($date_of_birth)));
+        $part3 = strtoupper(substr($civil_status, 0, 1));
+        $part4 = str_pad(rand(0, 9999), 5, '0', STR_PAD_LEFT);
+        $res_code = $part1 . "-" . $part2 . "-" . $part3 . "-" . $part4;
+
+        $query = "INSERT INTO residents (resident_code, last_name, given_name, middle_name, date_of_birth, date_of_stay, civil_status)
+         VALUES ('$res_code', '$safe_last_name', '$safe_first_name', '$safe_middle_name', '$safe_date_of_birth', '$safe_date_of_stay', '$safe_civil_status')";
+
+        if ($conn->query($query)) {
+            header("Location: index.php");
+            exit;
+        }
+
+        $error = "Unable to add resident.";
     }
 }
 
@@ -37,6 +59,9 @@ if(isset($_POST['submit'])) {
 <h3>Add New Resident</h3>
 <a href="index.php">Back</a>
 <br>
+<?php if ($error !== ""): ?>
+    <p><?php echo htmlspecialchars($error); ?></p>
+<?php endif; ?>
 <form action="create.php" method="POST" style="padding: 10px; margin: 5px;">
     Last Name<input type="text" name="last_name" placeholder="Last Name" required><br>
     First Name<input type="text" name="first_name" placeholder="First Name" required><br>
